@@ -1,0 +1,26 @@
+NOTES.private.md
+
+# ENVIRONMENT
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SYSTEM
+.DS_Store
+*.pem
+
+# LOGS
+logs
+*.log
+
+# TESTING
+coverage
+
+# REDIS
+*.rdb
+dump.rdb
+
+# OLD STUFF
+__deprecated__
