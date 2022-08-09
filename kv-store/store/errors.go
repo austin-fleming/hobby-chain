@@ -48,3 +48,15 @@ func ErrInsufficientData() StoreError {
 func ErrDataCorruption() StoreError {
 	return NewStoreError("ErrDataCorruption", "Failed to Deserialize", "Checksums do not match", nil)
 }
+func ErrRecordTooLarge(maxSize int, recordSize int) StoreError {
+	return NewStoreError("ErrRecordTooLarge", "Record too Large", fmt.Sprintf("max %d, record %d", maxSize, recordSize), nil)
+}
+func ErrOpenFile(filePath string, err error) StoreError {
+	return NewStoreError("ErrOpenFile", "Failed to Open File", fmt.Sprintf("file at %s", filePath), err)
+}
+func ErrWriteFile(filePath string, err error) StoreError {
+	return NewStoreError("ErrStoreWrite", "Failed to Write Record", fmt.Sprintf("file at %s", filePath), err)
+}
+func ErrScannerCreationError(err error) StoreError {
+	return NewStoreError("ErrScannerCreationError", "Failed to Create Scanner", "", err)
+}

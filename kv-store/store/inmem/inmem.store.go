@@ -61,3 +61,8 @@ func (s *Store) Delete(key string) error {
 	s.Unlock()
 	return nil
 }
+
+func (s *Store) Close() error {
+	s.logger.Print("Db closed: in-memory database being used, therefore this is just a placeholder message.")
+	return nil
+}
