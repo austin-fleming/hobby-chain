@@ -13,6 +13,7 @@ type ledgerStore struct {
 	storagePath   string
 	maxRecordSize int
 	logger        *log.Logger
+	index         *index
 	writeMutex    sync.Mutex
 }
 
@@ -29,6 +30,17 @@ func (s *ledgerStore) Get(key string) ([]byte, error) {
 	defer file.Close()
 	if openErr != nil {
 		return nil, store.ErrOpenFile(s.storagePath, openErr)
+	}
+
+	keyOffset, ok := s.index.Search(key)
+	if !ok {
+		return nil, store.ErrIndexNotFound(key, nil)
+	}
+
+	// jump to index
+	_, seekErr := file.Seek(keyOffset, 0)
+	if seekErr != nil {
+		return nil, store.ErrIndexSeek(key, seekErr)
 	}
 
 	scanner, scanErr := record.NewScanner(file, s.maxRecordSize)
@@ -71,9 +83,9 @@ func (s *ledgerStore) Close() error {
 	return nil
 }
 
-func (s *ledgerStore) append(record *record.Record) error {
-	if record.Size() > s.maxRecordSize {
-		return store.ErrRecordTooLarge(s.maxRecordSize, record.Size())
+func (s *ledgerStore) append(rec *record.Record) error {
+	if rec.Size() > s.maxRecordSize {
+		return store.ErrRecordTooLarge(s.maxRecordSize, rec.Size())
 	}
 
 	s.writeMutex.Lock()
@@ -86,10 +98,19 @@ func (s *ledgerStore) append(record *record.Record) error {
 	}
 
 	// TODO: Now that I'm calling it, this usage kind of usage is kind of inverted (in a bad way)
-	_, writeErr := record.Write(file)
+	bytesWritten, writeErr := rec.Write(file)
 	if writeErr != nil {
 		return store.ErrWriteFile(s.storagePath, writeErr)
 	}
 
-	return file.Sync()
+	if closeErr := file.Close(); closeErr != nil {
+		return store.ErrFileClose(closeErr)
+	}
+	if syncErr := file.Sync(); syncErr != nil {
+		return store.ErrFileSync(syncErr)
+	}
+
+	s.index.Insert(rec.GetKey(), int64(bytesWritten))
+
+	return nil
 }

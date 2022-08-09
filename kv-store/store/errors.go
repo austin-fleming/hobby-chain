@@ -2,6 +2,7 @@ package store
 
 import "fmt"
 
+// TODO: add op
 type StoreError struct {
 	kind    string
 	message string
@@ -59,4 +60,19 @@ func ErrWriteFile(filePath string, err error) StoreError {
 }
 func ErrScannerCreationError(err error) StoreError {
 	return NewStoreError("ErrScannerCreationError", "Failed to Create Scanner", "", err)
+}
+func ErrScan(err error) StoreError {
+	return NewStoreError("ErrScan", "Scanner Error", "An issue occurred when scanning value", err)
+}
+func ErrFileClose(err error) StoreError {
+	return NewStoreError("ErrFileClose", "File Close Error", "", err)
+}
+func ErrFileSync(err error) StoreError {
+	return NewStoreError("ErrFileSync", "File Sync Error", "", err)
+}
+func ErrIndexNotFound(key string, err error) StoreError {
+	return NewStoreError("ErrIndexNotFound", "Index Not Found", fmt.Sprintf("no index for key: %s", key), err)
+}
+func ErrIndexSeek(key string, err error) StoreError {
+	return NewStoreError("ErrIndexSeek", "Index Seek Failed", fmt.Sprintf("could not seek for item with the key: %s", key), err)
 }
