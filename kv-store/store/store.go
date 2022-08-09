@@ -6,11 +6,3 @@ type Store interface {
 	Delete(key string) error
 	Close() error
 }
-
-type ErrNotFound struct {
-	key string
-}
-
-type ErrBadRequest struct {
-	reason string
-}
